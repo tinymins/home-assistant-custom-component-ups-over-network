@@ -1,0 +1,7 @@
+{
+  "name": "UPS Over Network",
+  "render_readme": true,
+  "domain": "ups_over_network",
+  "documentation": "https://github.com/tinymins/home-assistant-custom-component-ups-over-network",
+  "issue_tracker": "https://github.com/tinymins/home-assistant-custom-component-ups-over-network/issues"
+}
