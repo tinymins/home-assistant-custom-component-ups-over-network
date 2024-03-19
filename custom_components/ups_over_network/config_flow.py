@@ -1,5 +1,16 @@
 import voluptuous as vol
+from datetime import timedelta
+from homeassistant.const import (
+    CONF_HOST,
+    CONF_ID,
+    CONF_NAME,
+    CONF_PORT,
+    CONF_PROTOCOL,
+    CONF_RESOURCES,
+    CONF_SCAN_INTERVAL
+)
 from homeassistant.helpers import config_validation as cv
+from .const import SENSOR_DEFINITIONS
 
 PLATFORM_SCHEMA = vol.Schema({
     vol.Required(CONF_HOST): cv.string,

@@ -14,29 +14,18 @@ from homeassistant.const import (
     CONF_PORT,
     CONF_PROTOCOL,
     CONF_RESOURCES,
-    CONF_SCAN_INTERVAL,
-    ELECTRIC_POTENTIAL_VOLT,
-    FREQUENCY_HERTZ,
-    TEMP_CELSIUS,
-    PERCENTAGE
+    CONF_SCAN_INTERVAL
 )
+from .const import SENSOR_DEFINITIONS
+from .config_flow import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
-# Define sensor types and units
-SENSOR_DEFINITIONS = {
-    "raw": ["Raw", "", "mdi:text-box-outline"],
-    "input_voltage": ["Input Voltage", ELECTRIC_POTENTIAL_VOLT, "mdi:flash"],
-    "fault_voltage": ["Fault Voltage", ELECTRIC_POTENTIAL_VOLT, "mdi:flash-off"],
-    "output_voltage": ["Output Voltage", ELECTRIC_POTENTIAL_VOLT, "mdi:flash"],
-    "load": ["Load", PERCENTAGE, "mdi:gauge"],
-    "frequency": ["Frequency", FREQUENCY_HERTZ, "mdi:current-ac"],
-    "battery_voltage": ["Battery Voltage", ELECTRIC_POTENTIAL_VOLT, "mdi:battery"],
-    "temperature": ["Temperature", TEMP_CELSIUS, "mdi:thermometer"],
-}
-
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the UPS sensor."""
+    # Explicitly validate the configuration against the PLATFORM_SCHEMA
+    config = PLATFORM_SCHEMA(config)
+
     ups_id = config[CONF_ID]
     ups_name = config[CONF_NAME]
     ups_host = config[CONF_HOST]
