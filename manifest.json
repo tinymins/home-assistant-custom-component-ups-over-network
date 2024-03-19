@@ -1,6 +1,6 @@
 {
-  "domain": "ups_over_tcp",
-  "name": "UPS Over TCP",
+  "domain": "ups_over_network",
+  "name": "UPS Over Network",
   "config_flow": false,
   "version": "1.0.0",
   "requirements": [],
