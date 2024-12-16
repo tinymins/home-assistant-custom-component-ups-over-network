@@ -14,12 +14,13 @@ from homeassistant.const import (
     CONF_PORT,
     CONF_PROTOCOL,
     CONF_RESOURCES,
-    CONF_SCAN_INTERVAL
+    CONF_SCAN_INTERVAL,
 )
 from .const import SENSOR_DEFINITIONS
 from .config_flow import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Set up the UPS sensor."""
@@ -52,20 +53,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         if sensor_definition:
             sensors.append(
                 UPSSensor(
-                    coordinator,
-                    ups_id,
-                    ups_name,
-                    sensor_type,
-                    *sensor_definition
+                    coordinator, ups_id, ups_name, sensor_type, *sensor_definition
                 )
             )
 
     async_add_entities(sensors, True)
 
+
 class UPSDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching UPS data."""
 
-    def __init__(self, hass, logger, name, update_interval, ups_host, ups_port, ups_protocol):
+    def __init__(
+        self, hass, logger, name, update_interval, ups_host, ups_port, ups_protocol
+    ):
         """Initialize."""
         self.ups_host = ups_host
         self.ups_port = ups_port
@@ -75,12 +75,12 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data_megatec_q1(self, reader, writer):
         # Send Q1 command
-        writer.write(b'Q1\r')
+        writer.write(b"Q1\r")
         await writer.drain()
 
         # Read response
         data = await reader.read(1024)
-        response = data.decode('utf-8').strip()
+        response = data.decode("utf-8").strip()
 
         # Close connection
         writer.close()
@@ -88,9 +88,9 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
 
         # Parse the response
         # Remove the parentheses
-        values = response[1:-1].split(' ')
+        values = response[1:-1].split(" ")
         # Validate response
-        if not response.startswith('(') or len(values) < 6:
+        if not response.startswith("(") or len(values) < 6:
             raise UpdateFailed(f"Invalid response from UPS: {response}")
 
         return {
@@ -115,10 +115,20 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
         except Exception as e:
             raise UpdateFailed(f"Error communicating with UPS: {e}")
 
+
 class UPSSensor(CoordinatorEntity, Entity):
     """Implementation of a UPS sensor."""
 
-    def __init__(self, coordinator, ups_id, ups_name, sensor_type, sensor_name, sensor_unit, sensor_icon):
+    def __init__(
+        self,
+        coordinator,
+        ups_id,
+        ups_name,
+        sensor_type,
+        sensor_name,
+        sensor_unit,
+        sensor_icon,
+    ):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self._ups_id = ups_id

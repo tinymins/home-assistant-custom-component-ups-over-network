@@ -2,7 +2,7 @@ from homeassistant.const import (
     UnitOfElectricPotential,
     UnitOfFrequency,
     UnitOfTemperature,
-    PERCENTAGE
+    PERCENTAGE,
 )
 
 # Define sensor types and units
