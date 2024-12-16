@@ -116,15 +116,18 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
             "load": float(values[3]),
             "frequency": float(values[4]),
             "battery_voltage": float(values[5]),
-            "battery_level": max(
-                0,
-                min(
-                    1,
-                    (float(values[5]) - self.low_battery_voltage)
-                    / (self.full_battery_voltage - self.low_battery_voltage),
-                ),
+            "battery_level": int(
+                max(
+                    0,
+                    min(
+                        1,
+                        (float(values[5]) - self.low_battery_voltage)
+                        / (self.full_battery_voltage - self.low_battery_voltage),
+                    ),
+                )
+                * 10000
             )
-            * 100,
+            / 100,
             "temperature": float(values[6]),
         }
 
