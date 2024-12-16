@@ -22,6 +22,8 @@ PLATFORM_SCHEMA = vol.Schema(
         vol.Required(CONF_RESOURCES): vol.All(
             cv.ensure_list, [vol.In(SENSOR_DEFINITIONS.keys())]
         ),
+        vol.Optional("low_battery_voltage", default=24): cv.positive_int,
+        vol.Optional("full_battery_voltage", default=27): cv.positive_int,
         vol.Optional(CONF_SCAN_INTERVAL, default=timedelta(seconds=30)): cv.time_period,
     },
     extra=vol.ALLOW_EXTRA,

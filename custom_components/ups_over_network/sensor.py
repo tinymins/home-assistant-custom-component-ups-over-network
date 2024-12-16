@@ -34,6 +34,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     ups_protocol = config[CONF_PROTOCOL]
     resources = config[CONF_RESOURCES]
     scan_interval = config.get(CONF_SCAN_INTERVAL, timedelta(seconds=30))
+    low_battery_voltage = config["low_battery_voltage"]
+    full_battery_voltage = config["full_battery_voltage"]
 
     coordinator = UPSDataUpdateCoordinator(
         hass,
@@ -43,6 +45,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         ups_host=ups_host,
         ups_port=ups_port,
         ups_protocol=ups_protocol,
+        low_battery_voltage=low_battery_voltage,
+        full_battery_voltage=full_battery_voltage,
     )
 
     await coordinator.async_config_entry_first_refresh()
@@ -64,12 +68,23 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
     """Class to manage fetching UPS data."""
 
     def __init__(
-        self, hass, logger, name, update_interval, ups_host, ups_port, ups_protocol
+        self,
+        hass,
+        logger,
+        name,
+        update_interval,
+        ups_host,
+        ups_port,
+        ups_protocol,
+        low_battery_voltage,
+        full_battery_voltage,
     ):
         """Initialize."""
         self.ups_host = ups_host
         self.ups_port = ups_port
         self.ups_protocol = ups_protocol
+        self.low_battery_voltage = low_battery_voltage
+        self.full_battery_voltage = full_battery_voltage
 
         super().__init__(hass, logger, name=name, update_interval=update_interval)
 
@@ -101,6 +116,15 @@ class UPSDataUpdateCoordinator(DataUpdateCoordinator):
             "load": float(values[3]),
             "frequency": float(values[4]),
             "battery_voltage": float(values[5]),
+            "battery_level": max(
+                0,
+                min(
+                    1,
+                    (float(values[5]) - self.low_battery_voltage)
+                    / (self.full_battery_voltage - self.low_battery_voltage),
+                ),
+            )
+            * 100,
             "temperature": float(values[6]),
         }
 
@@ -161,6 +185,12 @@ class UPSSensor(CoordinatorEntity, Entity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
+        if self._sensor_type == "battery_level":
+            if self.state == 100:
+                return "mdi:battery"
+            if self.state < 10:
+                return "mdi:battery-alert-variant-outline"
+            return f"mdi:battery-{int(self.state / 10) * 10}"
         return self._sensor_icon
 
     @property

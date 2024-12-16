@@ -15,4 +15,5 @@ SENSOR_DEFINITIONS = {
     "frequency": ["Frequency", UnitOfFrequency.HERTZ, "mdi:current-ac"],
     "battery_voltage": ["Battery Voltage", UnitOfElectricPotential.VOLT, "mdi:battery"],
     "temperature": ["Temperature", UnitOfTemperature.CELSIUS, "mdi:thermometer"],
+    "battery_level": ["Battery Level", PERCENTAGE, "mdi:battery"],
 }
