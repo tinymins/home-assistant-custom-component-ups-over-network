@@ -177,6 +177,8 @@ class UPSSensor(CoordinatorEntity, Entity):
             "manufacturer": "UPS Over Network",
             "model": "Generic UPS",
         }
+        if self._sensor_type == "raw":
+            self._attr_entity_registry_enabled_default = False
 
     @property
     def available(self):
