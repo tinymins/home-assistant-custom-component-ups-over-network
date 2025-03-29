@@ -17,25 +17,32 @@ from homeassistant.const import (
     CONF_SCAN_INTERVAL,
 )
 from .const import SENSOR_DEFINITIONS
-from .config_flow import PLATFORM_SCHEMA
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
-    """Set up the UPS sensor."""
-    # Explicitly validate the configuration against the PLATFORM_SCHEMA
-    config = PLATFORM_SCHEMA(config)
+async def async_setup_entry(hass, config_entry, async_add_entities):
+    """Set up the UPS Over Network sensor."""
+    # Get data from config entry
+    config = config_entry.data
+    options = config_entry.options
 
-    ups_id = config[CONF_ID]
-    ups_name = config[CONF_NAME]
-    ups_host = config[CONF_HOST]
-    ups_port = config[CONF_PORT]
-    ups_protocol = config[CONF_PROTOCOL]
-    resources = config[CONF_RESOURCES]
-    scan_interval = config.get(CONF_SCAN_INTERVAL, timedelta(seconds=30))
-    low_battery_voltage = config["low_battery_voltage"]
-    full_battery_voltage = config["full_battery_voltage"]
+    # Merge data and options
+    combined_config = {**config}
+    if options:
+        # Prioritize settings from options
+        for key, value in options.items():
+            combined_config[key] = value
+
+    # Use the combined config directly
+    ups_id = combined_config.get(CONF_ID)
+    ups_name = combined_config.get(CONF_NAME)
+    ups_host = combined_config.get(CONF_HOST)
+    ups_port = combined_config.get(CONF_PORT)
+    ups_protocol = combined_config.get(CONF_PROTOCOL, "Megatec/Q1")
+    scan_interval = timedelta(seconds=combined_config.get(CONF_SCAN_INTERVAL))
+    low_battery_voltage = combined_config.get("low_battery_voltage")
+    full_battery_voltage = combined_config.get("full_battery_voltage")
 
     coordinator = UPSDataUpdateCoordinator(
         hass,
@@ -52,14 +59,12 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     await coordinator.async_config_entry_first_refresh()
 
     sensors = []
-    for sensor_type in resources:
-        sensor_definition = SENSOR_DEFINITIONS.get(sensor_type)
-        if sensor_definition:
-            sensors.append(
-                UPSSensor(
-                    coordinator, ups_id, ups_name, sensor_type, *sensor_definition
-                )
+    for sensor_type, sensor_definition in SENSOR_DEFINITIONS.items():
+        sensors.append(
+            UPSSensor(
+                coordinator, ups_id, ups_name, sensor_type, *sensor_definition
             )
+        )
 
     async_add_entities(sensors, True)
 
@@ -164,26 +169,26 @@ class UPSSensor(CoordinatorEntity, Entity):
         self._sensor_name = sensor_name
         self._sensor_unit = sensor_unit
         self._sensor_icon = sensor_icon
+        self._attr_unique_id = f"{self._ups_id}_{self._sensor_type}"
+        self._attr_name = f"{self._ups_name} {self._sensor_name}"
+        self._attr_device_info = {
+            "identifiers": {("ups_over_network", self._ups_id)},
+            "name": self._ups_name,
+            "manufacturer": "UPS Over Network",
+            "model": "Generic UPS",
+        }
 
     @property
-    def id(self):
-        """Return the id of the sensor."""
-        return f"{self._ups_id}_{self._sensor_type}"
-
-    @property
-    def unique_id(self):
-        """Return the unique_id of the sensor."""
-        return f"{self._ups_id}_{self._sensor_type}"
-
-    @property
-    def name(self):
-        """Return the name of the sensor."""
-        return f"{self._ups_name} {self._sensor_name}"
+    def available(self):
+        """Return if entity is available."""
+        return self.coordinator.last_update_success and self.coordinator.data and self._sensor_type in self.coordinator.data
 
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self.coordinator.data.get(self._sensor_type)
+        if self.available:
+            return self.coordinator.data.get(self._sensor_type)
+        return None
 
     @property
     def icon(self):
@@ -191,9 +196,10 @@ class UPSSensor(CoordinatorEntity, Entity):
         if self._sensor_type == "battery_level":
             if self.state == 100:
                 return "mdi:battery"
-            if self.state < 10:
+            if self.state is not None and self.state < 10:
                 return "mdi:battery-alert-variant-outline"
-            return f"mdi:battery-{int(self.state / 10) * 10}"
+            if self.state is not None:
+                return f"mdi:battery-{int(self.state / 10) * 10}"
         return self._sensor_icon
 
     @property

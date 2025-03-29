@@ -5,6 +5,8 @@ from homeassistant.const import (
     PERCENTAGE,
 )
 
+DOMAIN = "ups_over_network"
+
 # Define sensor types and units
 SENSOR_DEFINITIONS = {
     "raw": ["Raw", "", "mdi:text-box-outline"],

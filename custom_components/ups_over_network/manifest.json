@@ -1,16 +1,11 @@
 {
   "domain": "ups_over_network",
   "name": "UPS Over Network",
-  "codeowners": ["@tinymins"],
   "config_flow": true,
-  "dependencies": [],
-  "documentation": "https://github.com/tinymins/home-assistant-custom-component-ups-over-network",
-  "homekit": {},
-  "integration_type": "device",
-  "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/tinymins/home-assistant-custom-component-ups-over-network/issues",
+  "documentation": "https://github.com/yourusername/home-assistant-custom-component-ups-over-network",
   "requirements": [],
-  "ssdp": [],
+  "dependencies": [],
+  "codeowners": ["@tinymins"],
   "version": "1.0.0",
-  "zeroconf": []
+  "iot_class": "local_polling"
 }
