@@ -99,6 +99,8 @@ class UpsOverNetworkOptionsFlow(config_entries.OptionsFlow):
             # Update configuration
             options = {
                 # Removed CONF_RESOURCES from here
+                CONF_HOST: user_input.get(CONF_HOST),
+                CONF_PORT: user_input.get(CONF_PORT),
                 "low_battery_voltage": user_input.get("low_battery_voltage", DEFAULT_LOW_BATTERY_VOLTAGE),
                 "full_battery_voltage": user_input.get("full_battery_voltage", DEFAULT_FULL_BATTERY_VOLTAGE),
                 CONF_SCAN_INTERVAL: user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
@@ -115,6 +117,14 @@ class UpsOverNetworkOptionsFlow(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema({
+                vol.Required(
+                    CONF_HOST,
+                    default=options.get(CONF_HOST, data.get(CONF_HOST))
+                ): str,
+                vol.Required(
+                    CONF_PORT,
+                    default=options.get(CONF_PORT, data.get(CONF_PORT, 502))
+                ): int,
                 vol.Optional(
                     "low_battery_voltage",
                     default=options.get("low_battery_voltage", data.get("low_battery_voltage", DEFAULT_LOW_BATTERY_VOLTAGE))
