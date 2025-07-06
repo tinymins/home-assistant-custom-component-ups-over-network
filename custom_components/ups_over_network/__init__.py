@@ -24,18 +24,15 @@ async def async_setup(hass: HomeAssistant, config):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up UPS Over Network from a config entry."""
     hass.data.setdefault(DOMAIN, {})
-    
+
     # Store the config entry data in hass.data
     hass.data[DOMAIN][entry.entry_id] = entry.data
 
     # Set up platforms
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.config_entries.async_forward_entry_setup(entry, platform)
-        )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     entry.async_on_unload(entry.add_update_listener(update_listener))
-    
+
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
@@ -48,7 +45,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
             ]
         )
     )
-    
+
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
 
