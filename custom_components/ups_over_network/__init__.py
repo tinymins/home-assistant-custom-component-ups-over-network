@@ -7,6 +7,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.const import (
     CONF_SCAN_INTERVAL,
+    CONF_HOST,
+    CONF_PORT,
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 
@@ -24,6 +26,31 @@ async def async_setup(hass: HomeAssistant, config):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Set up UPS Over Network from a config entry."""
     hass.data.setdefault(DOMAIN, {})
+
+    # Get configuration
+    config = entry.data
+    options = entry.options
+    combined_config = {**config}
+    if options:
+        for key, value in options.items():
+            combined_config[key] = value
+
+    ups_host = combined_config.get(CONF_HOST)
+    ups_port = combined_config.get(CONF_PORT)
+
+    # Test UPS connection before setting up platforms
+    try:
+        _LOGGER.debug("Testing UPS connection to %s:%s", ups_host, ups_port)
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_connection(ups_host, ups_port),
+            timeout=10.0
+        )
+        writer.close()
+        await writer.wait_closed()
+        _LOGGER.debug("UPS connection test successful")
+    except Exception as err:
+        _LOGGER.error("Failed to connect to UPS at %s:%s: %s", ups_host, ups_port, err)
+        raise ConfigEntryNotReady(f"Unable to connect to UPS at {ups_host}:{ups_port}: {err}") from err
 
     # Store the config entry data in hass.data
     hass.data[DOMAIN][entry.entry_id] = entry.data
