@@ -22,8 +22,8 @@ from .const import DOMAIN, SENSOR_DEFINITIONS
 _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_SCAN_INTERVAL = 3
-DEFAULT_LOW_BATTERY_VOLTAGE = 24
-DEFAULT_FULL_BATTERY_VOLTAGE = 27
+DEFAULT_LOW_BATTERY_VOLTAGE = 24.0
+DEFAULT_FULL_BATTERY_VOLTAGE = 27.0
 
 class UpsOverNetworkConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for UPS Over Network."""
@@ -128,11 +128,11 @@ class UpsOverNetworkOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(
                     "low_battery_voltage",
                     default=options.get("low_battery_voltage", data.get("low_battery_voltage", DEFAULT_LOW_BATTERY_VOLTAGE))
-                ): cv.positive_int,
+                ): cv.positive_float,
                 vol.Optional(
                     "full_battery_voltage",
                     default=options.get("full_battery_voltage", data.get("full_battery_voltage", DEFAULT_FULL_BATTERY_VOLTAGE))
-                ): cv.positive_int,
+                ): cv.positive_float,
                 vol.Optional(
                     CONF_SCAN_INTERVAL,
                     default=options.get(CONF_SCAN_INTERVAL, data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL))
